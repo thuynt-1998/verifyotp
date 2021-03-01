@@ -52,7 +52,8 @@ const styles = StyleSheet.create({
     inputStyle: {
         flex: 2,
         marginLeft: 20,
-        flexDirection: "row"
+        flexDirection: "row",
+        alignItems: "center"
     }
 
 })
