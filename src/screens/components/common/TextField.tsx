@@ -18,7 +18,7 @@ const TextField = ({ labels, placeholder, value, onChange, isSecurity, error }: 
                 <View
                     style={styles.inputStyle}
                 >
-                    <Text>+84</Text>
+
                     <TextInput
                         placeholder={placeholder}
                         placeholderTextColor="grey"
@@ -33,7 +33,7 @@ const TextField = ({ labels, placeholder, value, onChange, isSecurity, error }: 
 
 
             </View>
-            {error && <Text style={{ color: "red", fontSize: 12, textAlign: "right" }}>{error.message}</Text>}
+            {error && <Text style={ styles.erroStyle}>{error.message}</Text>}
 
         </View>
     )
@@ -54,6 +54,12 @@ const styles = StyleSheet.create({
         marginLeft: 20,
         flexDirection: "row",
         alignItems: "center"
+    },
+    erroStyle: {
+        color: "red",
+        fontSize: 12,
+        textAlign: "right",
+        marginBottom:10
     }
 
 })
