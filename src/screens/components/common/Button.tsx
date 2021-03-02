@@ -1,21 +1,22 @@
 import React from "react"
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
 
 interface PropsGlobals {
-    children: React.ReactNode|string;
+    children: React.ReactNode | string;
     onPress: () => void;
-    container:boolean
+    container: boolean;
+    isLoad: boolean
 }
 
-const Button = ({ children, onPress , container}: PropsGlobals) => {
+const Button = ({ children, onPress, container, isLoad }: PropsGlobals) => {
     return (
         <TouchableOpacity
-            style={{...styles.container, backgroundColor:container? "darkgreen": undefined}}
+            style={{ ...styles.container, backgroundColor: container ? isLoad ? "darkgray": "darkgreen" : undefined }}
             activeOpacity={0.8}
             onPress={onPress}
         >
-            <Text style={styles.textStyle}>{children}</Text>
+            {isLoad ? <ActivityIndicator color="white" /> : <Text style={styles.textStyle}>{children}</Text>}
         </TouchableOpacity>
     )
 }

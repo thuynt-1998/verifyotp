@@ -9,7 +9,7 @@ import Button from "../../components/common/Button";
 import { useLoginFunction } from "../../navigation/context/LoginContext";
 
 const ConfirmloginScreen = () => {
-    const [counter, setCounter] = useState(60);
+    const [counter, setCounter] = useState(90);
     const route: any = useRoute()
     const [confirm, setConfirm] = useState<any>()
     const { onSaveToken } = useLoginFunction()
@@ -26,7 +26,7 @@ const ConfirmloginScreen = () => {
             .then(confirmResult => {
                 if (confirmResult) {
                     setConfirm(confirmResult)
-                    setCounter(60)
+                    setCounter(90)
                 }
             })
             .catch(error => {

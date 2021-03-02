@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, } from "react"
+import React, { useCallback, useEffect, useState, } from "react"
 import { Controller, useForm } from "react-hook-form"
 import {  View } from "react-native"
 import auth from '@react-native-firebase/auth';
@@ -16,7 +16,9 @@ const LoginScreen = (props: any) => {
         resolver: yupResolver(valid),
         defaultValues: { username: "" }
     })
+    const [isLoad, setLoad] = useState(false)
     const onLogin = useCallback(({ username }: { username: string }) => {
+        setLoad(true)
         var regexp = /^\+[0-9]?()[0-9](\s|\S)(\d[0-9]{8,12})$/
         const phoneCheck = regexp.test(username)
         if (phoneCheck) {
@@ -24,10 +26,11 @@ const LoginScreen = (props: any) => {
                 .signInWithPhoneNumber(username)
                 .then(confirmResult => {                                        
                     if (confirmResult) {
+                       
                         navigation.navigate("confirmlogin", { confirm: confirmResult, phone: username })
                         reset()
+                        setLoad(false)
                     }
-
                 })
                 .catch(error => {
                     if (error.code === "auth/invalid-phone-number") {
@@ -36,11 +39,13 @@ const LoginScreen = (props: any) => {
                     else if (error.code === "auth/popup-closed-by-user") {
 
                     }
-
+                    setLoad(false)
                 })
+                
         }
         else {
             showMessage({message:"Số điện thoại không hợp lệ", type:"danger"})
+            setLoad(false)
         }
     }, [])
     return (
@@ -60,13 +65,10 @@ const LoginScreen = (props: any) => {
 
                     }
                 />
-                <Button onPress={handleSubmit(onLogin)} container>
+                <Button onPress={handleSubmit(onLogin)} container isLoad={isLoad}>
                     Đăng nhập
                 </Button>
             </View>
-
-
-
         </View>
     )
 }
