@@ -8,26 +8,32 @@
 
 import React from 'react';
 import {
-  SafeAreaView,
   StyleSheet,
-  ScrollView,
   View,
-  Text,
-  StatusBar,
 } from 'react-native';
-import AppContainer from './src/screens/navigation/AppContainer';
+import FlashMessage from "react-native-flash-message";
 
-const App= () => {
+import AppContainer from './src/screens/navigation/AppContainer';
+import { RegisterFunctionLoginContext, RegisterLoginContext,useRegisterLoginReducer } from './src/screens/navigation/context/LoginContext';
+
+const App = () => {
+  const {currentState, onLoginAction}= useRegisterLoginReducer()
   return (
-    <View style= {{flex:1}}>
-      <AppContainer/>
-     
-    </View>
+    <RegisterLoginContext.Provider value={ currentState}>
+      <RegisterFunctionLoginContext.Provider value={onLoginAction}>
+        <View style={{ flex: 1 }}>
+        <AppContainer />
+        <FlashMessage position="top" />
+      </View>
+      </RegisterFunctionLoginContext.Provider>
+      
+    </RegisterLoginContext.Provider>
+
   );
 };
 
 const styles = StyleSheet.create({
-  
+
 });
 
 export default App;
