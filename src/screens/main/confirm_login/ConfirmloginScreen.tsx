@@ -1,66 +1,80 @@
-import React, { useEffect, useState } from "react"
-import { Alert, StyleSheet, Text, View } from "react-native"
+import React, { useCallback, useEffect, useState } from "react"
+import {  StyleSheet, Text, View } from "react-native"
 import OTPInputView from '@twotalltotems/react-native-otp-input'
+import auth from '@react-native-firebase/auth';
+import { useRoute } from "@react-navigation/native";
+import { showMessage } from "react-native-flash-message";
+
 import Button from "../../components/common/Button";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useLoginFunction } from "../../navigation/context/LoginContext";
 
 const ConfirmloginScreen = () => {
     const [counter, setCounter] = useState(60);
-    const navigation= useNavigation()
-    const route = useRoute()
+    const route: any = useRoute()
+    const [confirm, setConfirm] = useState<any>()
+    const { onSaveToken } = useLoginFunction()
 
     useEffect(() => {
         const timer: any = counter > 0 && setInterval(() => setCounter(counter - 1), 1000);
+        setConfirm(route.params?.confirm)
         return () => clearInterval(timer)
-    }, [counter]);
+    }, [counter,route]);
 
+    const onSendAgain = useCallback(() => {
+        auth()
+            .signInWithPhoneNumber(route.params?.phone)
+            .then(confirmResult => {
+                if (confirmResult) {
+                    setConfirm(confirmResult)
+                    setCounter(60)
+                }
+            })
+            .catch(error => {
+                console.log("---" + error.message);
+            })
+    }, [])
+    const onCodeFilled = useCallback((code) => {
+        if (confirm) {
+            confirm
+                .confirm(code)
+                .then((user: any) => {                    
+                    if (user) {
+                        onSaveToken(user.user.uid)
+                    }
+                })
+                .catch((error: any) => {
+                    if (error.code === "auth/invalid-verification-code") {
+                        showMessage({ message: "Mã xác minh không đúng.", type: "danger" })
+                    }
+                    else if (error.code === "auth/code-expired") {
+                        showMessage({ message: "Mã xác minh đã hết hạn", type: "info" })
+                    }
+                })
+        }
+    }, [confirm])
     return (
         <View style={styles.container}>
             <Text style={{ ...styles.textStyle, textTransform: "uppercase" }}>Nhập mã OTP</Text>
             <OTPInputView
                 style={{ width: '100%', height: 100 }}
                 pinCount={6}
-                //    code={"1234"} //You can supply this prop or not. The component will be used as a controlled / uncontrolled component respectively.
-                //    onCodeChanged = {code => { console.log(code);
-                //    }}
                 codeInputFieldStyle={styles.inputField}
                 codeInputHighlightStyle={styles.borderInput}
-                onCodeFilled={(code => {
-                    console.log( route.params?.cofirm);
-                    if(route.params?.cofirm)
-                    {
-                        route.params?.cofirm
-                        .confirm(code)
-                        .then(user => {
-
-                        })
-                        .catch(error => {
-
-                            console.log(error)
-                        })
-                    }
-                    
-                })}
+                onCodeFilled={onCodeFilled}
                 placeholderCharacter="0"
                 placeholderTextColor="grey"
             />
             {counter > 0 ?
-                <Text
-                    style={styles.textStyle}
-                >
+                <Text style={styles.textStyle} >
                     Gửi lại mã otp sau <Text
                         style={styles.textBold}
                     >
                         {counter}s
                     </Text>
                 </Text> :
-                <Button>Gửi lại </Button>
+                <Button onPress={onSendAgain} container>Gửi lại </Button>
 
             }
-
-
-
-
         </View>
     )
 }

@@ -1,9 +1,10 @@
+import React, { useCallback, useEffect, } from "react"
+import { Controller, useForm } from "react-hook-form"
+import {  View } from "react-native"
+import auth from '@react-native-firebase/auth';
+import { showMessage } from "react-native-flash-message";
 import { yupResolver } from "@hookform/resolvers/yup"
 import { useNavigation } from "@react-navigation/native"
-import React, { useCallback, useEffect, useState } from "react"
-import { Controller, useForm } from "react-hook-form"
-import { Alert, View } from "react-native"
-import auth from '@react-native-firebase/auth';
 
 import Button from "../../components/common/Button"
 import TextField from "../../components/common/TextField"
@@ -15,40 +16,35 @@ const LoginScreen = (props: any) => {
         resolver: yupResolver(valid),
         defaultValues: { username: "" }
     })
-    const [phone, setPhone] = useState<string>()
     const onLogin = useCallback(({ username }: { username: string }) => {
-        var regexp = /^\+[0-9]?()[0-9](\s|\S)(\d[0-9]{8,16})$/
-        const phoneCheck = regexp.test("+84" + username)
+        var regexp = /^\+[0-9]?()[0-9](\s|\S)(\d[0-9]{8,12})$/
+        const phoneCheck = regexp.test(username)
         if (phoneCheck) {
-            setPhone(username)
             auth()
-                .signInWithPhoneNumber("+84" + username)
-                .then(confirmResult => {
+                .signInWithPhoneNumber(username)
+                .then(confirmResult => {                                        
                     if (confirmResult) {
-                        navigation.navigate("confirmlogin",{cofirm: confirmResult, phone:"+84" + username})
+                        navigation.navigate("confirmlogin", { confirm: confirmResult, phone: username })
+                        reset()
                     }
+
                 })
                 .catch(error => {
-                    console.log(error.message);
+                    if (error.code === "auth/invalid-phone-number") {
+                        showMessage({message:"Số điện thoại không đúng.", type:"danger"})
+                    }
+                    else if (error.code === "auth/popup-closed-by-user") {
+
+                    }
+
                 })
         }
-        else{
-            Alert.alert(
-                "",
-                "Số điện thoại không hợp lệ",
-                [
-                  
-                  { text: "OK", onPress: () => {reset()} }
-                ],
-                { cancelable: false }
-              );
+        else {
+            showMessage({message:"Số điện thoại không hợp lệ", type:"danger"})
         }
-    }, [navigation])
-    useEffect(() => {
-        reset()
     }, [])
     return (
-        <View style={{ flex: 1, justifyContent: "center", paddingHorizontal: 40 }}>
+        <View style={{ flex: 1, justifyContent: "center", paddingHorizontal: 20 }}>
             <View>
                 <Controller
                     control={control}
@@ -56,7 +52,7 @@ const LoginScreen = (props: any) => {
                     render={({ onChange, value }) =>
                         <TextField
                             labels="Số điện thoại"
-                            placeholder="Nhập số điện thoại"
+                            placeholder="Nhập số điện thoại. VD:+84..."
                             onChange={onChange}
                             value={value}
                             error={errors.username}
@@ -64,7 +60,7 @@ const LoginScreen = (props: any) => {
 
                     }
                 />
-                <Button onPress={handleSubmit(onLogin)}>
+                <Button onPress={handleSubmit(onLogin)} container>
                     Đăng nhập
                 </Button>
             </View>
